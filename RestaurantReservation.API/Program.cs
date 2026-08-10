@@ -1,15 +1,60 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using RestaurantReservation.API.Authentication;
 using RestaurantReservation.API.Endpoints;
 using RestaurantReservation.Db.Data;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<RestaurantReservationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+var rsa = RSA.Create(2048);
+
+builder.Services.AddSingleton(rsa);
+builder.Services.AddSingleton<JwtTokenGenerator>();
+
+builder.Services
+    .AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+
+            IssuerSigningKey = new RsaSecurityKey(
+                rsa.ExportParameters(false)),
+
+            ValidateLifetime = true,
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
-// testing the connection 
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint(
+            "/openapi/v1.json",
+            "Restaurant Reservation API v1");
+    });
+}
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// testing the connection
 app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
 {
     var canConnect = await db.Database.CanConnectAsync();
@@ -18,15 +63,16 @@ app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
         ? Results.Ok("Database connection successful!")
         : Results.Problem("Could not connect to database.");
 });
-// testing Endpoints 
-app.MapGet("/api/reservations", ReservationEndpoints.GetReservations); // without () means when someone sends a request call this func
-                                                                       // with () means this func call it now even if nobody sends a request
-app.MapGet("/api/reservations/{reservationId}",ReservationEndpoints.GetReservationsById);// cuz its collection !
-app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation);
-app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation);
-app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers);
-app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId);
-app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId);
-app.MapGet("/api/reservations/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId);
-app.MapGet("/api/employees/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId);
+
+// testing Endpoints
+app.MapPost("/api/auth/login", AuthEndpoints.Login);
+app.MapGet("/api/reservations", ReservationEndpoints.GetReservations).RequireAuthorization();
+app.MapGet("/api/reservations/{reservationId}", ReservationEndpoints.GetReservationsById).RequireAuthorization();
+app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation).RequireAuthorization();
+app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation).RequireAuthorization();
+app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers).RequireAuthorization();
+app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId).RequireAuthorization();
+app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId).RequireAuthorization();
+app.MapGet("/api/employees/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId).RequireAuthorization();
+app.MapGet("/api/reservations/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId).RequireAuthorization();
 app.Run();
