@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RestaurantReservation.API.Endpoints;
 using RestaurantReservation.Db.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,5 +18,9 @@ app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
         ? Results.Ok("Database connection successful!")
         : Results.Problem("Could not connect to database.");
 });
+// testing Endpoints 
+app.MapGet("/api/reservations", ReservationEndpoints.GetReservations); // without () means when someone sends a request call this func
+                                                                       // with () means this func call it now even if nobody sends a request
+app.MapGet("/api/reservations/{reservationId}",ReservationEndpoints.GetReservationsById);
 
 app.Run();
