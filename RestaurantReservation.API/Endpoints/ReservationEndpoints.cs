@@ -117,4 +117,13 @@ public static class ReservationEndpoints
             ).ToListAsync();
         return Results.Ok(menuItems);
     }
+
+    public static async Task<IResult> AvgOrderAmountByEmployeeId(RestaurantReservationDbContext db , int employeeId)
+    {
+        var existingEmployee = await db.Employees.AnyAsync(e => e.EmployeeId == employeeId);
+        if(!existingEmployee){return Results.NotFound($"Employee with ID {employeeId} wasn't found");}
+
+        var avg = await db.Orders.Where(o => o.EmployeeId == employeeId).AverageAsync(o => o.TotalAmount);
+        return Results.Ok(new { employeeId, AvgOrderAmount = avg });
+    }
 }
