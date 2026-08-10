@@ -21,4 +21,11 @@ public static class ReservationEndpoints
 
         return Results.Ok(reservation);
     }
+
+    public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, Reservation reservation)
+    {
+        db.Reservations.Add(reservation);
+        await db.SaveChangesAsync();
+        return Results.Created($"/api/reservations/{reservation.ReservationId}",reservation); //201 and give the client the url and the reservation obj as a json 
+    }
 }

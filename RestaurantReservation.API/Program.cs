@@ -21,6 +21,6 @@ app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
 // testing Endpoints 
 app.MapGet("/api/reservations", ReservationEndpoints.GetReservations); // without () means when someone sends a request call this func
                                                                        // with () means this func call it now even if nobody sends a request
-app.MapGet("/api/reservations/{reservationId}",ReservationEndpoints.GetReservationsById);
-
+app.MapGet("/api/reservations/{reservationId}",ReservationEndpoints.GetReservationsById);// cuz its collection !
+app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation);
 app.Run();
