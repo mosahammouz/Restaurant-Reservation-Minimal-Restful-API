@@ -27,4 +27,5 @@ app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReser
 app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers);
 app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId);
 app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId);
+app.MapGet("/api/reservations/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId);
 app.Run();

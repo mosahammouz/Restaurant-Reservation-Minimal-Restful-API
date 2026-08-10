@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RestaurantReservation.Db.Data;
+using RestaurantReservation.Db.Models;
 
 namespace RestaurantReservation.API.Endpoints;
 
@@ -93,5 +94,27 @@ public static class ReservationEndpoints
             })
             .ToListAsync();
         return Results.Ok(orders);
+    }
+
+    public static async Task<IResult> GetOrderedMenuItemsByReservationId(RestaurantReservationDbContext db , int reservationId)
+    {
+        var existingReservation = await db.Reservations.AnyAsync(r => r.ReservationId == reservationId);
+        if(!existingReservation){return Results.NotFound($"Reservation with {reservationId} id is NOT found");}
+
+        var menuItems = await db.Orders.Where(o => o.ReservationId == reservationId)
+            .SelectMany(o => o.OrderItems)
+            .Select(oi => new
+                {
+                    oi.MenuItemId,
+                    oi.Quantity,
+                    MenuItem = new
+                    {
+                        oi.MenuItem.MenuItemId,
+                        oi.MenuItem.Name,
+                        oi.MenuItem.Price
+                    }
+                }
+            ).ToListAsync();
+        return Results.Ok(menuItems);
     }
 }
