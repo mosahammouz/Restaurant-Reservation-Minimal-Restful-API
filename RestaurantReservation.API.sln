@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestaurantReservation.API", "RestaurantReservation.API\RestaurantReservation.API.csproj", "{EFC765C3-36E9-418B-AA9A-1EA29B602606}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestaurantReservation.Db", "..\RestaurantReservation\RestaurantReservation.Db\RestaurantReservation.Db.csproj", "{CC433230-6C18-4A9B-99A7-3EC27ED22B33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EFC765C3-36E9-418B-AA9A-1EA29B602606}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC765C3-36E9-418B-AA9A-1EA29B602606}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFC765C3-36E9-418B-AA9A-1EA29B602606}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC765C3-36E9-418B-AA9A-1EA29B602606}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC433230-6C18-4A9B-99A7-3EC27ED22B33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC433230-6C18-4A9B-99A7-3EC27ED22B33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC433230-6C18-4A9B-99A7-3EC27ED22B33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC433230-6C18-4A9B-99A7-3EC27ED22B33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
