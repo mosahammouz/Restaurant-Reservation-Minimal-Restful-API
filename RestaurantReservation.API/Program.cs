@@ -23,4 +23,7 @@ app.MapGet("/api/reservations", ReservationEndpoints.GetReservations); // withou
                                                                        // with () means this func call it now even if nobody sends a request
 app.MapGet("/api/reservations/{reservationId}",ReservationEndpoints.GetReservationsById);// cuz its collection !
 app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation);
+app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation);
+app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers);
+app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId);
 app.Run();

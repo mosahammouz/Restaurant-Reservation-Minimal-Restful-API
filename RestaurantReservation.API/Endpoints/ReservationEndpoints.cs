@@ -28,4 +28,38 @@ public static class ReservationEndpoints
         await db.SaveChangesAsync();
         return Results.Created($"/api/reservations/{reservation.ReservationId}",reservation); //201 and give the client the url and the reservation obj as a json 
     }
+
+    public static async Task<IResult> UpdateReservation(RestaurantReservationDbContext db,Reservation reservation ,int reservationId)
+    {
+        var existingReservation  = await db.Reservations.FindAsync(reservationId); // if not exist return null
+        if (existingReservation  == null)
+        {
+            return Results.NotFound($"Reservation with {reservation.ReservationId} id is not found");
+        }
+        //existingReservation is already existed, so we are updating it
+        existingReservation.CustomerId = reservation.CustomerId;
+        existingReservation.RestaurantId = reservation.RestaurantId;
+        existingReservation.TableId = reservation.TableId;
+        existingReservation.ReservationDate = reservation.ReservationDate;
+        existingReservation.PartySize = reservation.PartySize;
+        await db.SaveChangesAsync();
+        return Results.Ok(new
+        {
+            message = "Reservations has been updated successfully",
+            reservation  =existingReservation
+        });
+
+    }
+
+    public static async Task<IResult> GetManagers(RestaurantReservationDbContext db)
+    {
+        var managers = await db.Employees.Where(e => e.Position == "Manager").ToListAsync();
+        return Results.Ok(managers);
+    }
+
+    public static async Task<IResult> GetReservationsByCustomerId(RestaurantReservationDbContext db, int customerId)
+    {
+        var reservations = await db.Reservations.Where(r => r.CustomerId == customerId).ToListAsync();
+        return Results.Ok(reservations);
+    }
 }
