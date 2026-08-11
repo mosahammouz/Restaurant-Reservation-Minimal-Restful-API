@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RestaurantReservation.API.DTOs.Reservation;
 using RestaurantReservation.Db.Data;
 using RestaurantReservation.Db.Models;
 
@@ -23,33 +24,65 @@ public static class ReservationEndpoints
         return Results.Ok(reservation);
     }
 
-    public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, Reservation reservation)
+    public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, CreateReservationDto dto)
     {
+        var reservation = new Reservation
+        {
+            CustomerId = dto.CustomerId,
+            RestaurantId = dto.RestaurantId,
+            TableId = dto.TableId,
+            ReservationDate = dto.ReservationDate,
+            PartySize = dto.PartySize
+        };
+
         db.Reservations.Add(reservation);
         await db.SaveChangesAsync();
-        return Results.Created($"/api/reservations/{reservation.ReservationId}",reservation); //201 and give the client the url and the reservation obj as a json 
-    }
 
-    public static async Task<IResult> UpdateReservation(RestaurantReservationDbContext db,Reservation reservation ,int reservationId)
-    {
-        var existingReservation  = await db.Reservations.FindAsync(reservationId); // if not exist return null
-        if (existingReservation  == null)
+        var reservationDto = new ReservationDto
         {
-            return Results.NotFound($"Reservation with {reservation.ReservationId} id is not found");
+            ReservationId = reservation.ReservationId,
+            CustomerId = reservation.CustomerId,
+            RestaurantId = reservation.RestaurantId,
+            TableId = reservation.TableId,
+            ReservationDate = reservation.ReservationDate,
+            PartySize = reservation.PartySize
+        };
+
+        return Results.Created(
+            $"/api/reservations/{reservation.ReservationId}",
+            reservationDto);
+    }
+    public static async Task<IResult> UpdateReservation(RestaurantReservationDbContext db, UpdateReservationDto dto, int reservationId)
+    {
+        var existingReservation = await db.Reservations.FindAsync(reservationId);
+
+        if (existingReservation == null)
+        {
+            return Results.NotFound(
+                $"Reservation with {reservationId} id is not found");
         }
-        //existingReservation is already existed, so we are updating it
-        existingReservation.CustomerId = reservation.CustomerId;
-        existingReservation.RestaurantId = reservation.RestaurantId;
-        existingReservation.TableId = reservation.TableId;
-        existingReservation.ReservationDate = reservation.ReservationDate;
-        existingReservation.PartySize = reservation.PartySize;
+
+        existingReservation.ReservationDate = dto.ReservationDate;
+        existingReservation.PartySize = dto.PartySize;
+        existingReservation.TableId = dto.TableId;
+
         await db.SaveChangesAsync();
+
+        var reservationDto = new ReservationDto
+        {
+            ReservationId = existingReservation.ReservationId,
+            CustomerId = existingReservation.CustomerId,
+            RestaurantId = existingReservation.RestaurantId,
+            TableId = existingReservation.TableId,
+            ReservationDate = existingReservation.ReservationDate,
+            PartySize = existingReservation.PartySize
+        };
+
         return Results.Ok(new
         {
-            message = "Reservations has been updated successfully",
-            reservation  =existingReservation
+            message = "Reservation has been updated successfully",
+            reservation = reservationDto
         });
-
     }
 
     public static async Task<IResult> GetManagers(RestaurantReservationDbContext db)

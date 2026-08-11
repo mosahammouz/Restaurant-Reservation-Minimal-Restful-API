@@ -84,11 +84,11 @@ app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
 
 // testing Endpoints
 app.MapPost("/api/auth/login", AuthEndpoints.Login);
+app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation).RequireAuthorization();
 app.MapGet("/api/reservations", ReservationEndpoints.GetReservations).RequireAuthorization();
 app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId).RequireAuthorization();
 app.MapGet("/api/reservations/{reservationId}", ReservationEndpoints.GetReservationsById).RequireAuthorization();
 app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation).RequireAuthorization();
-app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation).RequireAuthorization();
 app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers).RequireAuthorization();
 app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId).RequireAuthorization();
 app.MapGet("/api/employees/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId).RequireAuthorization();
