@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RestaurantReservation.API.Authentication;
@@ -7,13 +8,14 @@ using RestaurantReservation.Db.Data;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
         document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+        document.Components.SecuritySchemes ??=
+            new Dictionary<string, IOpenApiSecurityScheme>();
 
         document.Components.SecuritySchemes["Bearer"] =
             new OpenApiSecurityScheme
@@ -22,6 +24,26 @@ builder.Services.AddOpenApi(options =>
                 Scheme = "bearer",
                 BearerFormat = "JWT"
             };
+
+        return Task.CompletedTask;
+    });
+
+    options.AddOperationTransformer((operation, context, cancellationToken) =>
+    {
+        if (context.Description.ActionDescriptor.EndpointMetadata
+            .OfType<IAuthorizeData>()
+            .Any())
+        {
+            operation.Security ??= [];
+
+            operation.Security.Add(
+                new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference(
+                        "Bearer",
+                        context.Document)] = []
+                });
+        }
 
         return Task.CompletedTask;
     });
