@@ -8,6 +8,7 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
+builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<RestaurantReservationDbContext>(options =>
     options.UseSqlServer(
@@ -15,8 +16,8 @@ builder.Services.AddDbContext<RestaurantReservationDbContext>(options =>
 
 var rsa = RSA.Create(2048);
 
-builder.Services.AddSingleton(rsa);
-builder.Services.AddSingleton<JwtTokenGenerator>();
+builder.Services.AddSingleton(rsa); // it will add rsa to the DI Container
+builder.Services.AddSingleton<JwtTokenGenerator>();// whenever someone asks for JwtTokenGenerator type create or use the obj in the DI container (creating one from the constructor and it will reuser the RSA instance for the para. from DI container)
 
 builder.Services
     .AddAuthentication()
@@ -67,11 +68,11 @@ app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
 // testing Endpoints
 app.MapPost("/api/auth/login", AuthEndpoints.Login);
 app.MapGet("/api/reservations", ReservationEndpoints.GetReservations).RequireAuthorization();
+app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId).RequireAuthorization();
 app.MapGet("/api/reservations/{reservationId}", ReservationEndpoints.GetReservationsById).RequireAuthorization();
 app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation).RequireAuthorization();
 app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation).RequireAuthorization();
 app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers).RequireAuthorization();
-app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId).RequireAuthorization();
 app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId).RequireAuthorization();
 app.MapGet("/api/employees/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId).RequireAuthorization();
 app.MapGet("/api/reservations/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId).RequireAuthorization();
