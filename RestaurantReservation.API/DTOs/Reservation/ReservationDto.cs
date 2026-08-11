@@ -1,6 +1,6 @@
 namespace RestaurantReservation.API.DTOs.Reservation;
 
-public class ReservationDto
+public class ReservationDto //response
 {
     
     public int ReservationId { get; set; }

@@ -93,4 +93,6 @@ app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers).RequireA
 app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId).RequireAuthorization();
 app.MapGet("/api/employees/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId).RequireAuthorization();
 app.MapGet("/api/reservations/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId).RequireAuthorization();
+app.MapDelete("/api/reservations/{reservationId}", ReservationEndpoints.DeleteReservation);
+
 app.Run();

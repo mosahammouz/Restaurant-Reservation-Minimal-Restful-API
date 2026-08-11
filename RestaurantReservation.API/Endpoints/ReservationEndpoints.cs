@@ -23,7 +23,7 @@ public static class ReservationEndpoints
 
         return Results.Ok(reservation);
     }
-
+    
     public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, CreateReservationDto dto)
     {
         var reservation = new Reservation
@@ -52,6 +52,7 @@ public static class ReservationEndpoints
             $"/api/reservations/{reservation.ReservationId}",
             reservationDto);
     }
+    
     public static async Task<IResult> UpdateReservation(RestaurantReservationDbContext db, UpdateReservationDto dto, int reservationId)
     {
         var existingReservation = await db.Reservations.FindAsync(reservationId);
@@ -158,5 +159,16 @@ public static class ReservationEndpoints
 
         var avg = await db.Orders.Where(o => o.EmployeeId == employeeId).AverageAsync(o => o.TotalAmount);
         return Results.Ok(new { employeeId, AvgOrderAmount = avg });
+    }
+
+    public static async Task<IResult> DeleteReservation(RestaurantReservationDbContext db, int reservationId)
+    {
+        var reservation = await db.Reservations.FindAsync(reservationId);
+        if (reservation == null) { return Results.NotFound($"Reservation with id {reservationId} was not found"); }
+
+        db.Reservations.Remove(reservation);
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new { message = "Reservation has been deleted successfully" });
     }
 }
