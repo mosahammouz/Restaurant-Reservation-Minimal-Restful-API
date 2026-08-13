@@ -119,5 +119,5 @@ reservationsGroup.MapGet("/{reservationId}/orders", ReservationEndpoints.GetOrde
 employeesGroup.MapGet("/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId);
 reservationsGroup.MapGet("/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId);
 reservationsGroup.MapDelete("/{reservationId}", ReservationEndpoints.DeleteReservation);
-
+reservationsGroup.MapPatch("/{reservationId}", ReservationEndpoints.PatchReservation);
 app.Run();

@@ -23,7 +23,7 @@ public static class ReservationEndpoints // CRUD from/to Database
 
         return Results.Ok(reservation);
     }
-    
+
     public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, CreateReservationDto dto)
     {
         var reservation = new Reservation
@@ -50,9 +50,9 @@ public static class ReservationEndpoints // CRUD from/to Database
 
         return Results.Created(
             $"/api/reservations/{reservation.ReservationId}",
-            reservationDto);// without navigational props.
+            reservationDto); // without navigational props.
     }
-    
+
     public static async Task<IResult> UpdateReservation(RestaurantReservationDbContext db, UpdateReservationDto dto, int reservationId)
     {
         var existingReservation = await db.Reservations.FindAsync(reservationId);
@@ -95,7 +95,11 @@ public static class ReservationEndpoints // CRUD from/to Database
     public static async Task<IResult> GetReservationsByCustomerId(RestaurantReservationDbContext db, int customerId)
     {
         var customerExists = await db.Customers.AnyAsync(c => c.CustomerId == customerId);
-        if (!customerExists) { return Results.NotFound($"Customer with ID {customerId} was not found."); }
+        if (!customerExists)
+        {
+            return Results.NotFound($"Customer with ID {customerId} was not found.");
+        }
+
         var reservations = await db.Reservations.Where(r => r.CustomerId == customerId).ToListAsync();
         return Results.Ok(reservations);
     }
@@ -103,7 +107,10 @@ public static class ReservationEndpoints // CRUD from/to Database
     public static async Task<IResult> GetOrdersAndMenuItemsByReservationId(RestaurantReservationDbContext db, int reservationId)
     {
         var reservationExists = await db.Reservations.AnyAsync(r => r.ReservationId == reservationId);
-        if (!reservationExists) { return Results.NotFound($"Reservation with ID {reservationId} was not found."); }
+        if (!reservationExists)
+        {
+            return Results.NotFound($"Reservation with ID {reservationId} was not found.");
+        }
 
         var orders = await db.Orders
             .Where(o => o.ReservationId == reservationId)
@@ -130,10 +137,13 @@ public static class ReservationEndpoints // CRUD from/to Database
         return Results.Ok(orders);
     }
 
-    public static async Task<IResult> GetOrderedMenuItemsByReservationId(RestaurantReservationDbContext db , int reservationId)
+    public static async Task<IResult> GetOrderedMenuItemsByReservationId(RestaurantReservationDbContext db, int reservationId)
     {
         var existingReservation = await db.Reservations.AnyAsync(r => r.ReservationId == reservationId);
-        if(!existingReservation){return Results.NotFound($"Reservation with {reservationId} id is NOT found");}
+        if (!existingReservation)
+        {
+            return Results.NotFound($"Reservation with {reservationId} id is NOT found");
+        }
 
         var menuItems = await db.Orders.Where(o => o.ReservationId == reservationId)
             .SelectMany(o => o.OrderItems)
@@ -152,26 +162,43 @@ public static class ReservationEndpoints // CRUD from/to Database
         return Results.Ok(menuItems);
     }
 
-    public static async Task<IResult> AvgOrderAmountByEmployeeId(RestaurantReservationDbContext db , int employeeId)
+    public static async Task<IResult> AvgOrderAmountByEmployeeId(RestaurantReservationDbContext db, int employeeId)
     {
         var existingEmployee = await db.Employees.AnyAsync(e => e.EmployeeId == employeeId);
-        if(!existingEmployee){return Results.NotFound($"Employee with ID {employeeId} wasn't found");}
+        if (!existingEmployee)
+        {
+            return Results.NotFound($"Employee with ID {employeeId} wasn't found");
+        }
 
         var avg = await db.Orders
             .Where(o => o.EmployeeId == employeeId)
             .Select(o => (decimal?)o.TotalAmount)
-            .AverageAsync() ?? 0;    
+            .AverageAsync() ?? 0;
         return Results.Ok(new { employeeId, AvgOrderAmount = avg });
     }
 
     public static async Task<IResult> DeleteReservation(RestaurantReservationDbContext db, int reservationId)
     {
         var reservation = await db.Reservations.FindAsync(reservationId);
-        if (reservation == null) { return Results.NotFound($"Reservation with id {reservationId} was not found"); }
+        if (reservation == null)
+        {
+            return Results.NotFound($"Reservation with id {reservationId} was not found");
+        }
 
         db.Reservations.Remove(reservation);
         await db.SaveChangesAsync();
 
         return Results.Ok(new { message = "Reservation has been deleted successfully" });
+    }
+
+    public static async Task<IResult> PatchReservation(RestaurantReservationDbContext db, int reservationId, PatchReservationDto dto)
+    {
+        var reservation = await db.Reservations.FindAsync(reservationId);
+        if (reservation is null) { return Results.NotFound($"This id: {reservationId} was not found in Reservations table"); }
+        if (dto.TableId.HasValue) { reservation.TableId = dto.TableId.Value; }
+        if (dto.ReservationDate.HasValue) { reservation.ReservationDate = dto.ReservationDate.Value; }
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new { message = "Reservation has been patched successfully", reservation });
     }
 }
