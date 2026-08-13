@@ -5,7 +5,7 @@ using RestaurantReservation.Db.Models;
 
 namespace RestaurantReservation.API.Endpoints;
 
-public static class ReservationEndpoints
+public static class ReservationEndpoints // CRUD from/to Database
 {
     public static async Task<IResult> GetReservations(RestaurantReservationDbContext db) // IResult is the HTTP response
     {
@@ -38,7 +38,7 @@ public static class ReservationEndpoints
         db.Reservations.Add(reservation);
         await db.SaveChangesAsync();
 
-        var reservationDto = new ReservationDto
+        var reservationDto = new ReservationDto // for response
         {
             ReservationId = reservation.ReservationId,
             CustomerId = reservation.CustomerId,
@@ -50,7 +50,7 @@ public static class ReservationEndpoints
 
         return Results.Created(
             $"/api/reservations/{reservation.ReservationId}",
-            reservationDto);
+            reservationDto);// without navigational props.
     }
     
     public static async Task<IResult> UpdateReservation(RestaurantReservationDbContext db, UpdateReservationDto dto, int reservationId)
