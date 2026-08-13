@@ -63,6 +63,7 @@ The API provides the following endpoints:
 - `PUT /api/reservations/{reservationId}` – Update an existing reservation.
 - `DELETE /api/reservations/{reservationId}` – Delete a reservation.
 - `GET /api/reservations/customer/{customerId}` – Get reservations for a specific customer.
+- `PATCH /api/reservations/{reservationId}` - Update a partial reservation
 
 ### Orders and Menu Items
 
