@@ -103,18 +103,21 @@ app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
         ? Results.Ok("Database connection successful!")
         : Results.Problem("Could not connect to database.");
 });
-
+//Groups
+var authGroup = app.MapGroup("/api/auth");
+var reservationsGroup = app.MapGroup("/api/reservations").RequireAuthorization();
+var employeesGroup = app.MapGroup("/api/employees").RequireAuthorization();
 // testing Endpoints
-app.MapPost("/api/auth/login", AuthEndpoints.Login);
-app.MapPut("/api/reservations/{reservationId}", ReservationEndpoints.UpdateReservation).RequireAuthorization();
-app.MapGet("/api/reservations", ReservationEndpoints.GetReservations).RequireAuthorization();
-app.MapGet("/api/reservations/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId).RequireAuthorization();
-app.MapGet("/api/reservations/{reservationId}", ReservationEndpoints.GetReservationsById).RequireAuthorization();
-app.MapPost("/api/reservations", ReservationEndpoints.CreateReservation).RequireAuthorization();
-app.MapGet("/api/employees/managers", ReservationEndpoints.GetManagers).RequireAuthorization();
-app.MapGet("/api/reservations/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId).RequireAuthorization();
-app.MapGet("/api/employees/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId).RequireAuthorization();
-app.MapGet("/api/reservations/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId).RequireAuthorization();
-app.MapDelete("/api/reservations/{reservationId}", ReservationEndpoints.DeleteReservation);
+authGroup.MapPost("/login", AuthEndpoints.Login);
+reservationsGroup.MapPut("/{reservationId}", ReservationEndpoints.UpdateReservation);
+reservationsGroup.MapGet("/", ReservationEndpoints.GetReservations);
+reservationsGroup.MapGet("/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId);
+reservationsGroup.MapGet("/{reservationId}", ReservationEndpoints.GetReservationsById);
+reservationsGroup.MapPost("/", ReservationEndpoints.CreateReservation);
+employeesGroup.MapGet("/managers", ReservationEndpoints.GetManagers);
+reservationsGroup.MapGet("/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId);
+employeesGroup.MapGet("/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId);
+reservationsGroup.MapGet("/{reservationId}/menu-items", ReservationEndpoints.GetOrderedMenuItemsByReservationId);
+reservationsGroup.MapDelete("/{reservationId}", ReservationEndpoints.DeleteReservation);
 
 app.Run();

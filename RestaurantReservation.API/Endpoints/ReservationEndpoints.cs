@@ -157,7 +157,10 @@ public static class ReservationEndpoints // CRUD from/to Database
         var existingEmployee = await db.Employees.AnyAsync(e => e.EmployeeId == employeeId);
         if(!existingEmployee){return Results.NotFound($"Employee with ID {employeeId} wasn't found");}
 
-        var avg = await db.Orders.Where(o => o.EmployeeId == employeeId).AverageAsync(o => o.TotalAmount);
+        var avg = await db.Orders
+            .Where(o => o.EmployeeId == employeeId)
+            .Select(o => (decimal?)o.TotalAmount)
+            .AverageAsync() ?? 0;    
         return Results.Ok(new { employeeId, AvgOrderAmount = avg });
     }
 
