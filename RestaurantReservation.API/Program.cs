@@ -53,7 +53,7 @@ builder.Services.AddDbContext<RestaurantReservationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var rsa = RSA.Create(2048);
+var rsa = RSA.Create(2048);//{private key and public key}
 
 builder.Services.AddSingleton(rsa); // it will add rsa to the DI Container
 builder.Services.AddSingleton<JwtTokenGenerator>();// whenever someone asks for JwtTokenGenerator type create or use the obj in the DI container (creating one from the constructor and it will reuser the RSA instance for the para. from DI container)
@@ -95,7 +95,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // testing the connection
-app.MapGet("/test-db", async (RestaurantReservationDbContext db) =>
+app.MapGet("/test-db", async (RestaurantReservationDbContext db) => // DI is occurred by receiving obj as a parameter from DI container
 {
     var canConnect = await db.Database.CanConnectAsync();
 

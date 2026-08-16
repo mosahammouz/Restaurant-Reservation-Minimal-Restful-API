@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantReservation.API.DTOs.Reservation;
 using RestaurantReservation.Db.Data;
@@ -10,13 +11,14 @@ public static class ReservationEndpoints // CRUD from/to Database
     public static async Task<IResult> GetReservations(RestaurantReservationDbContext db) // IResult is the HTTP response
     {
         var reservations = await db.Reservations.ToListAsync();
+        if (reservations.Count == 0) return Results.Empty;
         return Results.Ok(reservations);
     }
 
-    public static async Task<IResult> GetReservationsById(RestaurantReservationDbContext db, int reservationId)
+    public static async Task<IResult> GetReservationsById(RestaurantReservationDbContext db, int reservationId) // reservationId will be routed with every Req.
     {
         var reservation = await db.Reservations.FindAsync(reservationId); // if not exist return null
-        if (reservation == null)
+        if (reservation == null) // validation
         {
             return Results.NotFound($"Reservation with {reservationId} id is not found");
         }
@@ -24,8 +26,8 @@ public static class ReservationEndpoints // CRUD from/to Database
         return Results.Ok(reservation);
     }
 
-    public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, CreateReservationDto dto)
-    {
+    public static async Task<IResult> CreateReservation(RestaurantReservationDbContext db, CreateReservationDto dto)// dto will be sent from body 
+    {                                                                                                                //ASP.NET Core uses JSON deserialization to create dto object                
         var reservation = new Reservation
         {
             CustomerId = dto.CustomerId,
@@ -199,6 +201,6 @@ public static class ReservationEndpoints // CRUD from/to Database
         if (dto.ReservationDate.HasValue) { reservation.ReservationDate = dto.ReservationDate.Value; }
         await db.SaveChangesAsync();
 
-        return Results.Ok(new { message = "Reservation has been patched successfully", reservation });
+        return Results.Ok(new { message = "Reservation has been patched successfully", reservation });//{k = v , obj}
     }
 }
