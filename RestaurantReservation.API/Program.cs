@@ -6,6 +6,7 @@ using RestaurantReservation.API.Authentication;
 using RestaurantReservation.API.Endpoints;
 using RestaurantReservation.Db.Data;
 using Microsoft.OpenApi;
+using RestaurantReservation.API.DTOs.Reservation;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi(options =>
@@ -125,7 +126,18 @@ reservationsGroup.MapPut("/{reservationId}", ReservationEndpoints.UpdateReservat
 reservationsGroup.MapGet("/", ReservationEndpoints.GetReservations);
 reservationsGroup.MapGet("/customer/{customerId}", ReservationEndpoints.GetReservationsByCustomerId);
 reservationsGroup.MapGet("/{reservationId}", ReservationEndpoints.GetReservationsById);
-reservationsGroup.MapPost("/", ReservationEndpoints.CreateReservation);
+reservationsGroup.MapPost("/", ReservationEndpoints.CreateReservation).AddEndpointFilter(async (context, next) =>
+{
+    var errors = new Dictionary<string, string[]>();
+    var reservationDtoArg = context.GetArgument<CreateReservationDto>(1);
+    if (reservationDtoArg.ReservationDate < DateTime.UtcNow)
+    {
+        errors.Add(nameof(reservationDtoArg.ReservationDate),["can not have Due Date in the past "]);
+    }
+
+    if (errors.Count > 0) return Results.ValidationProblem(errors);
+    return await next(context);
+});
 employeesGroup.MapGet("/managers", ReservationEndpoints.GetManagers);
 reservationsGroup.MapGet("/{reservationId}/orders", ReservationEndpoints.GetOrdersAndMenuItemsByReservationId);
 employeesGroup.MapGet("/{employeeId}/average-order-amount", ReservationEndpoints.AvgOrderAmountByEmployeeId);
