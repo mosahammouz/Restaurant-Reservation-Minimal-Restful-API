@@ -78,6 +78,18 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"[{context.Request.Method} -- {context.Request.Path}] Start Middleware 1");
+    await next(context);
+    Console.WriteLine($"[{context.Request.Method} -- {context.Request.Path}] Finish Middleware 1");
+});
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"[{context.Request.Method} -- {context.Request.Path}] Start Middleware 2");
+    await next(context);
+    Console.WriteLine($"[{context.Request.Method} -- {context.Request.Path}] Finish Middleware 2");
+});
 
 if (app.Environment.IsDevelopment())
 {
